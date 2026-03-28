@@ -97,10 +97,8 @@ class View:
         return id
     
     def captureName(self):
-        name = self.validateData(f"Ingrese el name del producto: ", str)
-        while not (name == ""):
-            id = self.errorNegative(name)
-        return name
+        data = self.validateData(f"Ingrese el nombre del producto: ", str)
+        return data
 
     def showProductView(self, data):
         print(data)

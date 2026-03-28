@@ -32,13 +32,16 @@ class Controller:
                         else:
                             self.view.errorExistence()
                     case 4:
-                        id_prod = self.view.captureId()
-                        productToRemove = self.modelList.searchById(id_prod)
-                        if(self.modelList.productExist(productToRemove)):
-                            productRemoved: Product = self.removeById(id_prod)
-                            self.view.showProductView(productRemoved.getData())
-                        else:
-                            self.view.errorExistence()
+                        # id_prod = self.view.captureId()
+                        # productToRemove = self.modelList.searchById(id_prod)
+                        # if(self.modelList.productExist(productToRemove)):
+                        #     productRemoved: Product = self.removeById(id_prod)
+                        #     self.view.showProductView(productRemoved.getData())
+                        # else:
+                        #     self.view.errorExistence()
+                        dataToSearch = self.view.captureName()
+                        productToRemove = self.modelList.searchByName(dataToSearch)
+                        if(self.modelList.productExist(productToRemove))
                     case 5:
                         pass
                     case 6:
@@ -65,12 +68,10 @@ class Controller:
             self.view.showAllView(products, self.modelList.getTotalCost())
 
     def searchById(self, id) -> Product:
-        productFound = Product()
         productFound = self.modelList.searchById(id)
         return productFound
 
     def searchByName(self, id) -> Product:
-        productFound = Product()
         productFound = self.modelList.searchByName(id)
         return productFound
 
@@ -81,13 +82,13 @@ class Controller:
         else:
             self.view.successExistence(res)
 
-    def removeById(self, id) -> Product:
-        productFound = Product()
-        productFound = self.modelList.searchById(id)
-        if (self.modelList.productExist(productFound)):
-            productRemoved = self.modelList.removeProduct(productFound.getId())
-            return productRemoved
-        return productFound
+    # def removeById(self, id) -> Product:
+    #     productFound = Product()
+    #     productFound = self.modelList.searchById(id)
+    #     if (self.modelList.productExist(productFound)):
+    #         productRemoved = self.modelList.removeProduct(productFound.getId())
+    #         return productRemoved
+    #     return productFound
 
     def saveCsv(self):
         print(f"Funcionalidad en desarrollo...")
