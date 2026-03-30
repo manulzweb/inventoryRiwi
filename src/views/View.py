@@ -98,8 +98,8 @@ class View:
         self.clearTerminal()
         """Captura los datos: Nombre, precio, cantidad. Y retorna una tupla en su respectivo orden. """
         name = self.captureName()
-        price = self.validateData(f"¿Cuanto cuesta una unidad de {name}? ", float)
-        quantity = self.validateData(f"¿Cuantas unidades de {name} registraras? ", int)
+        price = self.capturePrice()
+        quantity = self.captureQuantity()
         return name,price,quantity
 
     def captureId(self):
@@ -113,8 +113,8 @@ class View:
     def showMessage(self, data):
         print(data)
 
-    def showAllView(self, productos, totalCost):
-        print(f"Info Lista:\nCantidad de Productos: {len(productos)}\nCosto Total: {totalCost}\nLista:")
+    def showAllView(self, productos, total_cost):
+        print(f"Info Lista:\nCantidad de Productos: {len(productos)}\nCosto Total: {total_cost}\nLista:")
         for p in productos:
             print(f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: {p.getCost()}")
     

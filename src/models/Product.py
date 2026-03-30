@@ -26,7 +26,7 @@ class Product:
     def getPrice(self):
         return self.__price
     
-    def getQuantity(self):
+    def getQuantity(self) -> int:
         return self.__quantity
 
     def getCost(self):
