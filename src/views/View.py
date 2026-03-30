@@ -3,39 +3,36 @@ import os
 
 class View:
 
-    def __init__(self, controller = None):
+    def __init__(self):
         pass
 
     def clearTerminal(self):
-        os.system('clear')
+        if os.name == "nt":
+            os.system("cls")
+        else:
+            os.system("clear")
 
     def welcomeView(self):
             print(Fore.WHITE+ "╔════════════════════════════════╗")
             print(f"║           Bienvenido           ║")
-            print(f"╠════════════════════════════════╣" + Fore.RESET)
+            print(f"╚════════════════════════════════╝" + Fore.RESET)
         
     def menuView(self):
-        print(Fore.WHITE+f"║ 1. Registrar un nuevo producto ║")
+        print(Fore.WHITE+ "╔════════════════════════════════╗")
+        print(f"║ 1. Registrar un nuevo producto ║")
         print(f"║ 2. Ver todos los productos     ║")
-        print(f"║ 3. Buscar producto por id      ║")
+        print(f"║ 3. Buscar producto por nombre  ║")
         print(f"║ 4. Eliminar un producto        ║")
         print(f"║ 5. Guardar en csv              ║")
         print(f"║ 6. Cargar un csv               ║")
         print(f"║ 7. Cerrar programa             ║")
         print(f"╚════════════════════════════════╝"+ Fore.RESET)
         
-    def ValidateOption(self, op):
-        while not (op > 0 and op<=7):
-            op = self.errorOption()
-        return op
-    
     def errorOption(self):
         print(Fore.RED+"╔════════════════════════════════╗")
         print(f"║            ¡¡ERROR!!           ║")
         print(f"║   ¡Digite una opcion valida!   ║")
         print(f"╚════════════════════════════════╝"+ Fore.RESET)
-        op = self.validateData(f"Eliga una opción: ", int)
-        return op
 
     def errorNegative(self, id):
         print(Fore.RED+f"╔════════════════════════════════╗")
@@ -69,44 +66,57 @@ class View:
         print(f"║      Producto encontrado       ║")
         print(f"║  El producto con ID #{idFormateado} es:    ║")
         print(f"╚════════════════════════════════╝")
-        
-    def captureData(self):
-        self.clearTerminal()
-        """Captura los datos: Nombre, precio, cantidad. Y retorna una tupla en su respectivo orden. """
-        name = self.validateData(f"Ingrese el nombre del producto: ", str)
-        category = self.validateData(f"Ingrese el nombre del producto: ", str)
-        price = self.validateData(f"¿Cuanto cuesta una unidad de {name}? ", float)
-        quantity = self.validateData(f"¿Cuantas unidades de {name} registraras? ", int)
-        return name,category,price,quantity
     
     def validateData(self, mensaje, tipoDeDato): #Funcion capaz de validar todos los datos, ingresa el mensaje y luego con input lo lee, seguidamente lo valida, y por ultimo lo retorna si es que no salta excepcion
         validacion = False
         data = 0
         while not validacion:
             try:
-                data = tipoDeDato(input(mensaje))
+                data = tipoDeDato(input(mensaje).strip())
                 validacion = True
             except ValueError:
                 print(f"Error: El tipo de dato debe ser {tipoDeDato}")
         return data
 
-    def captureId(self):
-        id = self.validateData(f"Ingrese el id del producto: ", int)
-        while not (id > 0):
-            id = self.errorNegative(id)
-        return id
-    
     def captureName(self):
         data = self.validateData(f"Ingrese el nombre del producto: ", str)
+        if len(data) < 2:
+            raise ValueError("El nombre del producto es muy corto, debe ser mayor a 2 caracteres.")
+        if len(data) > 50:
+            raise ValueError("El nombre del producto es muy largo, debe ser menor a 50 caracteres.")
+        return data
+    
+    def capturePrice(self):
+        data = self.validateData(f"¿Cuanto cuesta una unidad? ", float)
         return data
 
-    def showProductView(self, data):
+    def captureQuantity(self):
+        data = self.validateData(f"¿Cuantas unidades registraras? ", int)
+        return data
+
+    def captureData(self):
+        self.clearTerminal()
+        """Captura los datos: Nombre, precio, cantidad. Y retorna una tupla en su respectivo orden. """
+        name = self.captureName()
+        price = self.validateData(f"¿Cuanto cuesta una unidad de {name}? ", float)
+        quantity = self.validateData(f"¿Cuantas unidades de {name} registraras? ", int)
+        return name,price,quantity
+
+    def captureId(self):
+        while True:
+            try:
+                id = self.validateData(f"Ingrese el id del producto: ", int)
+            except:
+                raise Exception("El id no puede ser menor que 1.")
+    
+
+    def showMessage(self, data):
         print(data)
 
-    def showAllView(self, productos, quantity):
-        print(f"Info Lista:\nCantidad de Productos: {len(productos)}\nCosto Total: {quantity}\nLista:")
+    def showAllView(self, productos, totalCost):
+        print(f"Info Lista:\nCantidad de Productos: {len(productos)}\nCosto Total: {totalCost}\nLista:")
         for p in productos:
-            print(f"Id: {p.getId()} | Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: {p.getCost()}")
+            print(f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: {p.getCost()}")
     
     def closeView(self):
         print(f"╔════════════════════════════════╗")

@@ -1,6 +1,7 @@
 from src.models.Product import Product
 from src.models.Inventory import Inventory
 from src.views.View import View
+import time
 
 class Controller:
 
@@ -10,85 +11,66 @@ class Controller:
 
     def start(self):
         self.view.clearTerminal()
+        self.view.welcomeView()
+        time.sleep(1.5)
         sw = True
         while sw:
-            # try:
-                self.view.welcomeView()
+            try:
                 self.view.menuView()
                 option = self.view.validateData("Eliga una opción: " , int)
-                option = self.view.ValidateOption(option)
                 match option:
                     case 1:
                         self.addProduct()
-
                     case 2:
+                        if(self.modelList.getInventory() == []):
+                            self.view.errorGetAll()
+                            return
                         self.getAll()
                     case 3:
                         self.view.clearTerminal()
-                        id_prod = self.view.captureId()
-                        product = self.modelList.searchById(id_prod)
-                        if(self.modelList.productExist(product)):
-                            self.view.showProductView(product.getData())
+                        if(self.modelList.getInventory() == []):
+                            self.view.errorGetAll()
                         else:
-                            self.view.errorExistence()
+                            name = self.view.captureName()
+                            product = self.modelList.searchByName(name)
+                            if(product == None):
+                                self.view.errorExistence()
+                            else:
+                                self.view.showMessage(product.getData())
                     case 4:
-                        # id_prod = self.view.captureId()
-                        # productToRemove = self.modelList.searchById(id_prod)
-                        # if(self.modelList.productExist(productToRemove)):
-                        #     productRemoved: Product = self.removeById(id_prod)
-                        #     self.view.showProductView(productRemoved.getData())
-                        # else:
-                        #     self.view.errorExistence()
-                        dataToSearch = self.view.captureName()
-                        productToRemove = self.modelList.searchByName(dataToSearch)
-                        if(self.modelList.productExist(productToRemove))
+                        self.view.clearTerminal()
+                        if(self.modelList.getInventory() == []):
+                            self.view.errorGetAll()
+                        else:
+                            name = self.view.captureName()
+                            product = self.modelList.searchByName(name)
+                            if(product == None):
+                                self.view.errorExistence()
+                            else:
+                                productDeleted = self.modelList.removeProduct(name)
+                                self.view.showMessage("Se ha eliminado correctamente el producto: "+productDeleted.getData())
                     case 5:
                         pass
                     case 6:
                         pass
                     case 7: 
                         sw = False
+                    case _:
+                        self.view.errorOption()
+            except Exception as e:
+                self.view.showMessage(f"Error: {e}")
 
     def addProduct(self):
         data: tuple[str | int | float] = (self.view.captureData())
-        productoCreated = self.modelList.createProduct(data)
-        res = self.modelList.addProduct(productoCreated)
-        self.view.clearTerminal()
-        if res:
-            self.view.successAdd(productoCreated)
-        else:
-            self.view.errorAdd()
+        productoCreated = Product(data[0], data[1], data[1])
+        self.modelList.addProduct(productoCreated)
 
-    def getAll(self): #probar
-        self.view.clearTerminal()
-        products = self.modelList.getInv()
+    def getAll(self):
+        products = self.modelList.getInventory()
         if not products:
             self.view.errorGetAll()
         else:
             self.view.showAllView(products, self.modelList.getTotalCost())
-
-    def searchById(self, id) -> Product:
-        productFound = self.modelList.searchById(id)
-        return productFound
-
-    def searchByName(self, id) -> Product:
-        productFound = self.modelList.searchByName(id)
-        return productFound
-
-    def productExist(self, product):
-        res = self.modelList.productExist(product)
-        if res == False:
-            self.view.errorExistence()
-        else:
-            self.view.successExistence(res)
-
-    # def removeById(self, id) -> Product:
-    #     productFound = Product()
-    #     productFound = self.modelList.searchById(id)
-    #     if (self.modelList.productExist(productFound)):
-    #         productRemoved = self.modelList.removeProduct(productFound.getId())
-    #         return productRemoved
-    #     return productFound
 
     def saveCsv(self):
         print(f"Funcionalidad en desarrollo...")
