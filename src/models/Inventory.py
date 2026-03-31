@@ -63,10 +63,13 @@ class InventoryManager:
 
     def calStats(self):
         """Calcula las estadisticas y las asigna mediante set. Para obtenerlas debes llamar al getter."""
-        self.setTotalCost(sum(p.getCost() for p in self.getInventory()))
-        self.setTotalQuantity(sum(p.getQuantity() for p in self.getInventory()))
-        self.setMostExpensive(reduce(lambda p1, p2: p1 if p1.getPrice() > p2.getPrice() else p2, self.getInventory()))
-        self.setMostExpensive(reduce(lambda p1, p2: p1 if p1.getPrice() > p2.getPrice() else p2, self.getInventory()))
+        if self.getInventory() == []:
+            print("Lista vacia. No se puede calcular las estadisticas de una lista vacia.")
+        else:
+            self.setTotalCost(sum(p.getCost() for p in self.getInventory()))
+            self.setTotalQuantity(sum(p.getQuantity() for p in self.getInventory()))
+            self.setMostExpensive(reduce(lambda p1, p2: p1 if p1.getPrice() > p2.getPrice() else p2, self.getInventory()))
+            self.setMostStocked(reduce(lambda p1, p2: p1 if p1.getQuantity() > p2.getQuantity() else p2, self.getInventory()))
 
     #Getters
     def getTotalCost(self) -> float:
@@ -108,4 +111,4 @@ class InventoryManager:
         self.__most_expensive = new_most_expensive
     
     def setMostStocked(self, new_most_stocked: Product):
-        self.new_most_stocked = new_most_stocked
+        self.__most_stocked = new_most_stocked
