@@ -1,5 +1,6 @@
-from colorama import Fore, Style
-import os
+from colorama import Fore
+from src.models.Product import Product as Product
+import os, time
 
 class View:
 
@@ -33,15 +34,7 @@ class View:
         print(f"║            ¡¡ERROR!!           ║")
         print(f"║   ¡Digite una opcion valida!   ║")
         print(f"╚════════════════════════════════╝"+ Fore.RESET)
-
-    def errorNegative(self, id):
-        print(Fore.RED+f"╔════════════════════════════════╗")
-        print(f"║ ¡ERROR!  ¡Digite un id valido! ║")
-        print(f"║  ID #{id} no puede ser negativo.  ║")
-        print(f"╚════════════════════════════════╝" + Fore.RESET)
-        id = self.validateData(f"Id : ", int)
-        return id
-
+        
     def errorAdd(self):
         print(Fore.RED+"Error, el producto no ha sido creado."+ Fore.RESET)
     
@@ -54,69 +47,110 @@ class View:
         print(f"║No existe un producto con ese ID║")
         print(f"╚════════════════════════════════╝"+Fore.RESET)
         
-    def successAdd(self, producto):
-        print(Fore.GREEN+f"Se agregó exitosamente el producto: {producto.getData()}"+Fore.RESET)
-
-    def successExistence(self, producto):
-        if producto.getId() < 10:
-            idFormateado = "0"+str(producto.getId())
-        else: 
-            idFormateado = producto.getId()
-        print(f"╔════════════════════════════════╗")
-        print(f"║      Producto encontrado       ║")
-        print(f"║  El producto con ID #{idFormateado} es:    ║")
-        print(f"╚════════════════════════════════╝")
+    def successAdd(self, product: Product):
+        print(Fore.GREEN+f"Se agregó exitosamente el producto: {product.getData()}"+Fore.RESET)
     
-    def validateData(self, mensaje, tipoDeDato): #Funcion capaz de validar todos los datos, ingresa el mensaje y luego con input lo lee, seguidamente lo valida, y por ultimo lo retorna si es que no salta excepcion
-        validacion = False
-        data = 0
-        while not validacion:
-            try:
-                data = tipoDeDato(input(mensaje).strip())
-                validacion = True
-            except ValueError:
-                print(f"Error: El tipo de dato debe ser {tipoDeDato}")
-        return data
+    def read(self, msg: str):
+        return input(msg)
 
+    def validateString(self, msg: str) -> str:
+        """Captura y valida cadenas."""
+        validation = False
+        string = ""
+        while not validation:
+            try:
+                string = str(self.read(f"{msg}"))
+                validation = True
+            except ValueError:
+                print("Debe introducir un texto")
+        return string
+    
+    def validateInteger(self, msg: str) -> int:
+        """Captura y valida enteros."""
+        validation = False
+        integer: int = 0
+        while not validation:
+            try:
+                integer = int(self.read(f"{msg}"))
+                validation = True
+            except ValueError:
+                print("Debe introducir un numero entero")
+        return integer
+    
+    def validateFloat(self, msg: str) -> float:
+        """Captura y valida flotantes."""
+        validation = False
+        fl: float = 0
+        while not validation:
+            try:
+                fl = float(self.read(f"{msg}"))
+                validation = True
+            except ValueError:
+                print("Debe introducir un numero flotante")
+        return fl
+    
     def captureName(self):
-        data = self.validateData(f"Ingrese el nombre del producto: ", str)
-        if len(data) < 2:
+        name = self.validateString("Nombre del producto: ")
+        if len(name) < 2:
             raise ValueError("El nombre del producto es muy corto, debe ser mayor a 2 caracteres.")
-        if len(data) > 50:
+        if len(name) > 50:
             raise ValueError("El nombre del producto es muy largo, debe ser menor a 50 caracteres.")
-        return data
+        return name
     
     def capturePrice(self):
-        data = self.validateData(f"¿Cuanto cuesta una unidad? ", float)
-        return data
+        price = float(self.validateFloat(f"Precio por unidad: "))
+        if price < 0: 
+            raise ValueError("El precio no puede ser negativo.")
+        return price
 
     def captureQuantity(self):
-        data = self.validateData(f"¿Cuantas unidades registraras? ", int)
-        return data
+        quantity = self.validateInteger(f"Cantidad de unidades: ")
+        if quantity < 0: 
+            raise ValueError("El precio no puede ser negativo.")
+        return quantity
 
-    def captureData(self):
+    def captureData(self) -> dict[str, str | float | int]:
         self.clearTerminal()
-        """Captura los datos: Nombre, precio, cantidad. Y retorna una tupla en su respectivo orden. """
-        name = self.captureName()
-        price = self.capturePrice()
-        quantity = self.captureQuantity()
-        return name,price,quantity
-
-    def captureId(self):
-        while True:
-            try:
-                id = self.validateData(f"Ingrese el id del producto: ", int)
-            except:
-                raise Exception("El id no puede ser menor que 1.")
-    
-
-    def showMessage(self, data):
+        validation = False
+        while not validation:
+            try: 
+                time.sleep(0.4)
+                self.showMessage("Ingrese los siguientes datos: ")
+                time.sleep(0.2)
+                name: str = self.captureName()
+                time.sleep(0.2)
+                price: float = self.capturePrice()
+                time.sleep(0.2)
+                quantity: int = self.captureQuantity()
+                time.sleep(0.2)
+                validation = True
+                return {
+                    "name": name,
+                    "price": price,
+                    "quantity" :quantity
+                        }
+            except ValueError as a:
+                self.showMessage(f"Error: {a}")
+        return {}
+                
+    def showMessage(self, data: str):
         print(data)
 
-    def showAllView(self, productos, total_cost):
-        print(f"Info Lista:\nCantidad de Productos: {len(productos)}\nCosto Total: {total_cost}\nLista:")
-        for p in productos:
-            print(f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: {p.getCost()}")
+    def showMessageColor(self, data: str, color: str):
+        match color:
+            case "red":
+                print(Fore.RED+data+Fore.RESET)
+            case "green":
+                print(Fore.GREEN+data+Fore.RESET)
+            case "yellow":
+                print(Fore.YELLOW+data+Fore.RESET)
+            case _:
+                pass
+
+    def showAllView(self, products: list[Product], total_cost: float):
+        print(f"Info Lista:\nCantidad de Productos: {len(products)}\nCosto Total: {total_cost}\nLista:")
+        for p in products:
+            print(f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: ${p.getCost()}")
     
     def closeView(self):
         print(f"╔════════════════════════════════╗")

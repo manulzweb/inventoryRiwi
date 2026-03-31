@@ -1,5 +1,5 @@
 from src.controllers.Controller import Controller
-from src.models.Inventory import Inventory
+from src.models.Inventory import InventoryManager as Inventory
 from src.views.View import View
 
 def main():
