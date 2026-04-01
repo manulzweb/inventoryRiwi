@@ -20,13 +20,15 @@ class View:
         
     def menuView(self):
         print(Fore.WHITE+ "╔════════════════════════════════╗")
-        print(f"║ 1. Registrar un nuevo producto ║")
-        print(f"║ 2. Ver todos los productos     ║")
+        print(f"║ 1. Agregar un nuevo producto   ║")
+        print(f"║ 2. Mostrar producto(s)         ║")
         print(f"║ 3. Buscar producto por nombre  ║")
-        print(f"║ 4. Eliminar un producto        ║")
-        print(f"║ 5. Guardar en csv              ║")
-        print(f"║ 6. Cargar un csv               ║")
-        print(f"║ 7. Cerrar programa             ║")
+        print(f"║ 4. Actualizar producto         ║")
+        print(f"║ 5. Eliminar producto           ║")
+        print(f"║ 5. Estadísticas producto       ║")
+        print(f"║ 7. Guardar CSV                 ║")
+        print(f"║ 8. Cargar CSV                  ║")
+        print(f"║ 9. Cerrar programa             ║")
         print(f"╚════════════════════════════════╝"+ Fore.RESET)
         
     def errorOption(self):
@@ -39,7 +41,10 @@ class View:
         print(Fore.RED+"Error, el producto no ha sido creado."+ Fore.RESET)
     
     def errorGetAll(self):
-        print(Fore.RED+"Error, no se ha podido listar los productos."+ Fore.RESET)
+        print(Fore.RED+"Error, lista vacia"+ Fore.RESET)
+    
+    def errorException(self, e: Exception):
+        print(Fore.RED+f"Error de tipo {type(e).__name__}: {e}"+ Fore.RESET)
     
     def errorExistence(self):
         print(Fore.RED+f"╔════════════════════════════════╗")
@@ -148,13 +153,13 @@ class View:
                 pass
 
     def showAllView(self, products: list[Product], total_cost: float):
-        print(f"Info Lista:\nCantidad de Productos: {len(products)}\nCosto Total: {total_cost}\nLista:")
+        print(Fore.WHITE+"Lista:")
         for p in products:
-            print(f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: ${p.getCost()}")
+            print(Fore.CYAN+f"Nombre: {p.getName()} | Precio: {p.getPrice()} | Cantidad {p.getQuantity()} | Costo Total: ${p.getCost()}"+Fore.RESET)
     
     def closeView(self):
-        print(f"╔════════════════════════════════╗")
+        print(Fore.LIGHTMAGENTA_EX+"╔════════════════════════════════╗")
         print(f"║       Cerrando Programa...     ║")
         print(f"║  Gracias por usar el programa! ║")
-        print(f"╚════════════════════════════════╝")
+        print(f"╚════════════════════════════════╝"+Fore.RESET)
         return False

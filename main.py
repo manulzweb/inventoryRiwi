@@ -1,11 +1,13 @@
 from src.controllers.Controller import Controller
-from src.models.Inventory import InventoryManager as Inventory
+from src.models.InventoryManager import InventoryManager as Inventory
 from src.views.View import View
+from src.services.CSVManager import CSVManager
 
 def main():
     model = Inventory()
     view = View()
-    ctrl = Controller(model, view)
+    csvManager = CSVManager()
+    ctrl = Controller(model, view, csvManager)
 
     ctrl.start()
 

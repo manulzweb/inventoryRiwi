@@ -16,13 +16,17 @@ class InventoryManager:
         """
         return self.__inventory
 
-    #Crear
+    def createProduct(self, data: dict[str, str | int | float]):
+        productoCreated = Product(str(data["name"]), float(data["price"]), int(data["quantity"]))
+        return productoCreated
+
+
     def addProduct(self, product: Product):
         """Agrega un producto a la lista de productos. Luego calcula las estadisticas.
         Args:
             Product: Objeto de clase Product
         """
-        self.getInventory().append(product)
+        self.__inventory.append(product)
         self.calStats()
 
     def removeProduct(self, name: str):
