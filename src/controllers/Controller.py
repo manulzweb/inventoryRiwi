@@ -14,7 +14,6 @@ class Controller:
     def start(self):
         self.view.clearTerminal()
         self.view.welcomeView()
-        time.sleep(1)
         sw = True
         while sw:
             try:
@@ -28,27 +27,18 @@ class Controller:
                     case 3:
                         self.view.clearTerminal()
                         product = self.getProduct(self.view.captureName())
-                        self.view.showProduct(product.getData())
+                        if product != None:
+                            self.view.showMessage(product.getData())
                     case 4:
                         self.updateProduct()
                     case 5:
-                        self.view.clearTerminal()
-                        if(self.modelInv.getInventory() == []):
-                            self.view.errorGetAll()
-                        else:
-                            name = self.view.captureName()
-                            product = self.modelInv.searchByName(name)
-                            if(product == None):
-                                self.view.errorExistence()
-                            else:
-                                productDeleted = self.modelInv.removeProduct(name)
-                                self.view.showMessage("Se ha eliminado correctamente el producto: "+productDeleted.getData())
+                        self.deleteProduct()
                     case 6:
-                        pass
+                        self.showStats()
                     case 7:
                         self.saveCsv()
                     case 8:
-                        pass
+                        self.loadCsv()
                     case 9: 
                         sw = False
                     case _:
@@ -67,18 +57,11 @@ class Controller:
         while sw:
             self.view.clearTerminal()
             pCreated = self.addProduct()
-            time.sleep(0.1)
             self.view.showMessageColor("¡Producto creado y agregado al inventario con exito!\n"+pCreated.getData(), "green")
-            time.sleep(0.1)
-            res:str = self.view.validateString("¿Desea agregar otro producto? (s/n): ")
-            if not (res.lower() == "n" or res.lower() == "s"):
-                res = self.view.validateString("Respuesta Incorrecta. ¿Desea agregar otro producto? (s/n): ")
-            if res.lower() == "n":
-                sw = False
-            time.sleep(0.3)
+            sw = self.view.ask_to_confirm("¿Desea agregar otro producto?")
 
     def getProduct(self, name:str):
-        if(self.modelInv.getInventory() == []):
+        if self.modelInv.isEmpty():
             self.view.errorGetAll()
         else:
             product = self.modelInv.searchByName(name)
@@ -88,22 +71,27 @@ class Controller:
 
     def showProducts(self):
         self.view.clearTerminal()
-        validation = False
-        while not validation:
+        if self.modelInv.isEmpty():
+            self.view.errorGetAll()
+        else:
+            sw = True
             res = self.view.validateInteger("¿Desea mostrar un producto (0) o todos? (1): ")
-            if res != 0 and res != 1:
-                res = self.view.validateInteger("Respuesta Incorrecta. ¿Desea mostrar un producto (0) o todos? (1): ")
-            elif res == 0:
-                name = self.view.captureName()
-                self.view.showMessage(self.getProduct(name).getData())
-                validation=True
-            else:
-                self.view.showAllView(self.modelInv.getInventory(), self.modelInv.getTotalCost())
-                validation=True
+            while sw:
+                if not (res == 0 or res == 1):
+                    res = self.view.validateInteger("Respuesta Incorrecta. ¿Desea mostrar un producto (0) o todos? (1): ")
+                elif res == 0:
+                    name = self.view.captureName()
+                    product = self.getProduct(name)
+                    if product:
+                        self.view.showMessage()
+                    sw=False
+                else:
+                    self.view.showAllView(self.modelInv.getInventory(), self.modelInv.getTotalCost())
+                    sw=False
 
     def updateProduct(self):
         self.view.clearTerminal()
-        if(self.modelInv.getInventory() == []):
+        if self.modelInv.isEmpty():
             self.view.errorGetAll()
         else:
             name = self.view.captureName()
@@ -117,45 +105,67 @@ class Controller:
                 self.view.showMessageColor("Producto actualizado: ", "green")
                 self.view.showMessage(self.getProduct(name).getData())
 
+    def deleteProduct(self):
+        self.view.clearTerminal()
+        if self.modelInv.isEmpty():
+            self.view.errorGetAll()
+        else:
+            name = self.view.captureName()
+            product = self.modelInv.searchByName(name)
+            if(product == None):
+                self.view.errorExistence()
+            else:
+                productDeleted = self.modelInv.removeProduct(name)
+                self.view.showMessage("Se ha eliminado correctamente el producto: "+productDeleted.getData())
+
+    def showStats(self):
+        self.modelInv.calStats()
+        self.view.showMessageColor(f"Costo Total: {self.modelInv.getTotalCost()}", "yellow")
+        self.view.showMessageColor(f"Cantidad Total: {self.modelInv.getTotalQuantity()}", "yellow")
+        self.view.showMessageColor(f"Producto más costoso: {self.modelInv.getMostExpensive().getData()}", "yellow")
+        self.view.showMessageColor(f"Producto con más stock: {self.modelInv.getMostStocked().getData()}", "yellow")
+
 
     def saveCsv(self):
-        switch = True
-        inv = self.modelInv.getInventory()
-        if  inv == []:
+        if self.modelInv.isEmpty():
             raise ValueError("Inventario vacio. No hay datos que guardar")
+        inv = self.modelInv.getInventory()
         path = self.view.validateString("Ingrese el path donde quiera guardar el csv: ")
-        while switch == True:
+        sw = True
+        while sw:
             try:
                 self.csv_manager.save_csv(inv,path)
-            except Exception as e:
-                if not (type(e) == FileNotFoundError or type(e) == IsADirectoryError):
-                    self.view.errorException(e)
+                self.view.showMessageColor("Datos guardados con éxito", "green")
+                sw = False
+            except (FileNotFoundError, IsADirectoryError) as e:
+                self.view.showMessageColor("Pusiste un directorio o el archivo no fue encontrado", "red")
+                res = self.view.ask_to_confirm("¿Desea crear un archivo CSV?")
+                if not res:
+                    sw=False
                 else:
-                    self.view.errorException(e)
-                    sw = True
-                    res:str=self.view.validateString("¿Desea crear un archivo CSV? (s/n)")
-                    while sw == True:
-                        if not (res.lower() == "n" or res.lower() == "s"):
-                            res = self.view.validateString("Respuesta Incorrecta. ¿Desea crear un archivo CSV? (s/n): ")
-                        if res.lower() == "n":
-                            switch = False
-                        else:
-                            name = self.view.validateString("Ingrese un nombre personalizado para su archivo csv (Si el campo queda vacio el nombre será inventory) (n: cancelar)")
-                            if name == "n":
-                                switch = False
-                            if name == "":
-                                path = self.csv_manager.createFileCSV(path)
-                                self.view.showMessageColor(f"Archivo creado con exito! Intente nuevamente.\nRecuerde ingresar {name}.csv al final del path.\nEjemplo: {path}", "green")
-                                sw = False
-                            else: 
-                                path = self.csv_manager.createFileCSV(path, name)
-                                self.view.showMessageColor(f"Archivo creado con exito! Intente nuevamente.\nRecuerde ingresar {name}.csv al final del path.\nEjemplo: {path}", "green")
-                                sw = False
-            switch = False
+                    name = self.view.validateString("Ingrese un nombre personalizado para su archivo csv (Si el campo queda vacio el nombre será inventory) (n: cancelar)")
+                    if name == "":
+                        path = self.csv_manager.createFileCSV(path)
+                    else: 
+                        path = self.csv_manager.createFileCSV(path, name)
+                    self.view.showMessageColor(f"Archivo creado con exito! Ejemplo: {path}", "green")
+            except Exception as e:
+                self.view.errorException(e)
+                sw=False
 
     def loadCsv(self):
         path = self.view.validateString("Ingrese el path donde quiera guardar el csv: ")
         try:
-            self.csv_manager.load_csv(path)
+            data_list, error = self.csv_manager.load_csv(path)
+            for data in data_list:
+                new_product = self.modelInv.createProduct(data)
+                self.modelInv.addProduct(new_product)
+            if error == 0:
+                self.view.showMessageColor("¡No se encontró ninguna fila dañada!", "green")
+            elif error > 0 and error <= 3:
+                self.view.showMessageColor(f"Se encontraron {error} error(es) en las filas", "yellow")
+            elif errir > 3:
+                self.view.showMessageColor(f"Actividad Critica: Se encontraron {error} errores en las filas", "red")
+            self.view.showMessageColor("La carga fue exitosa.", "green")
         except Exception as e:
             self.view.errorException(e)

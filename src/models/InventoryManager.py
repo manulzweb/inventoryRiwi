@@ -9,13 +9,6 @@ class InventoryManager:
         self.__most_expensive: Product
         self.__most_stocked: Product
     
-    def getInventory(self) -> list[Product]:
-        """Getter de inventario.
-        Returns:
-            list[Product]: Lista de objetos producto.
-        """
-        return self.__inventory
-
     def createProduct(self, data: dict[str, str | int | float]):
         productoCreated = Product(str(data["name"]), float(data["price"]), int(data["quantity"]))
         return productoCreated
@@ -68,14 +61,25 @@ class InventoryManager:
     def calStats(self):
         """Calcula las estadisticas y las asigna mediante set. Para obtenerlas debes llamar al getter."""
         if self.getInventory() == []:
-            print("Lista vacia. No se puede calcular las estadisticas de una lista vacia.")
+            raise ValueError("Lista vacia. No se puede calcular las estadisticas de una lista vacia.")
         else:
             self.setTotalCost(sum(p.getCost() for p in self.getInventory()))
             self.setTotalQuantity(sum(p.getQuantity() for p in self.getInventory()))
             self.setMostExpensive(reduce(lambda p1, p2: p1 if p1.getPrice() > p2.getPrice() else p2, self.getInventory()))
             self.setMostStocked(reduce(lambda p1, p2: p1 if p1.getQuantity() > p2.getQuantity() else p2, self.getInventory()))
 
+    def isEmpty(self):
+        return self.getInventory() == []
+
     #Getters
+
+    def getInventory(self) -> list[Product]:
+        """Getter de inventario.
+        Returns:
+            list[Product]: Lista de objetos producto.
+        """
+        return self.__inventory
+
     def getTotalCost(self) -> float:
         """Obtiene el costo total
         Returns:
@@ -103,6 +107,9 @@ class InventoryManager:
             Product: Instancia con más stock de la lista.
         """
         return self.__most_stocked
+    #Setters
+    def setInventory(self, new_inv: list[Product]):
+        self.__inventory = new_inv
 
     def setTotalCost(self, new_cost: float):
         """"""
