@@ -2,7 +2,6 @@ from src.models.Product import Product
 from src.models.InventoryManager import InventoryManager as Inventory
 from src.views.View import View
 from src.services.CSVManager import CSVManager
-import time
 
 class Controller:
 
@@ -83,7 +82,7 @@ class Controller:
                     name = self.view.captureName()
                     product = self.getProduct(name)
                     if product:
-                        self.view.showMessage()
+                        self.view.showMessage(product.getData())
                     sw=False
                 else:
                     self.view.showAllView(self.modelInv.getInventory(), self.modelInv.getTotalCost())
@@ -103,7 +102,9 @@ class Controller:
                 quantity= self.view.captureQuantity()
                 self.modelInv.updateProduct(name, price, quantity)
                 self.view.showMessageColor("Producto actualizado: ", "green")
-                self.view.showMessage(self.getProduct(name).getData())
+                product = self.getProduct(name)
+                if product:
+                    self.view.showMessage(product.getData())
 
     def deleteProduct(self):
         self.view.clearTerminal()
@@ -153,19 +154,51 @@ class Controller:
                 self.view.errorException(e)
                 sw=False
 
+    def rowSkippedMessage(self, value: int):
+        if value == 0:
+            self.view.showMessageColor("¡No se encontró ninguna fila dañada! 0 Omitidas.", "green")
+        elif value > 0 and value <= 3:
+            self.view.showMessageColor(f"Se encontraron {value} fallas en filas, y fueron omitidas", "yellow")
+        elif value > 3:
+            self.view.showMessageColor(f"Actividad Critica: Se encontraron {value} fallas en las filas, y fueron totalmente omitidas.", "red")
+        
+
     def loadCsv(self):
         path = self.view.validateString("Ingrese el path donde quiera guardar el csv: ")
         try:
-            data_list, error = self.csv_manager.load_csv(path)
-            for data in data_list:
-                new_product = self.modelInv.createProduct(data)
-                self.modelInv.addProduct(new_product)
-            if error == 0:
-                self.view.showMessageColor("¡No se encontró ninguna fila dañada!", "green")
-            elif error > 0 and error <= 3:
-                self.view.showMessageColor(f"Se encontraron {error} error(es) en las filas", "yellow")
-            elif errir > 3:
-                self.view.showMessageColor(f"Actividad Critica: Se encontraron {error} errores en las filas", "red")
-            self.view.showMessageColor("La carga fue exitosa.", "green")
+            data_list, skipped = self.csv_manager.load_csv(path)
+            self.rowSkippedMessage(skipped)
+            res = self.view.ask_to_confirm("¿Sobrescribir inventario a actual?")
+            if res:
+                #Overwrite
+                self.modelInv.clearInv()
+                for data in data_list:
+                    new_product = self.modelInv.createProduct(data)
+                    self.modelInv.addProduct(new_product)
+                self.view.showMessageColor("La sobreescritura fue exitosa.", "green")
+            else:
+                #Fusion
+                for data in data_list:
+                    name_to_search: str = str(data["name"])
+                    product = self.getProduct(name_to_search)
+                    if product != None:
+                         #If product is differente to None, product exist, we sum the previous quantity with the csv quantity, and price update
+                        prev_quantity = product.getQuantity()
+                        quantity = prev_quantity+int(data["quantity"])
+                        self.modelInv.updateProduct(product.getName(), float(data["price"]), quantity)
+                    else:
+                        #If product doesnt exist, just create a product with dict data and add to the model
+                        new_product = self.modelInv.createProduct(data)
+                        self.modelInv.addProduct(new_product)
+                self.view.showMessageColor("La fusion fue exitosa.", "green")
+            self.view.showMessageColor(f"Productos cargados: {len(data_list)} | Filas omitidas: {skipped} ","cyan")
+        except FileNotFoundError as e:
+            self.view.errorException(e) #preguntarle a javi sobre esto. una excepcion que capture todos los raise? o varias para tener mas control.
+        except PermissionError as e:
+            self.view.errorException(e)
+        except UnicodeDecodeError as e:
+            self.view.errorException(e)
+        except ValueError as e:
+            self.view.errorException(e)
         except Exception as e:
             self.view.errorException(e)

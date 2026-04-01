@@ -1,7 +1,7 @@
 from colorama import Fore, init
 init(autoreset=True)
 from src.models.Product import Product as Product
-import os, time
+import os
 
 class View:
     """
@@ -256,6 +256,8 @@ class View:
                 print(Fore.YELLOW + data)
             case "cyan":
                 print(Fore.CYAN + data)
+            case _:
+                pass
 
     def showAllView(self, products: list[Product], total_cost: float):
         """Displays all products.

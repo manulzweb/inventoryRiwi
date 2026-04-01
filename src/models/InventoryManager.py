@@ -58,6 +58,9 @@ class InventoryManager:
             res.setPrice(new_price)
             res.setQuantity(new_quantity)
 
+    def clearInv(self):
+        self.getInventory().clear()
+
     def calStats(self):
         """Calcula las estadisticas y las asigna mediante set. Para obtenerlas debes llamar al getter."""
         if self.getInventory() == []:

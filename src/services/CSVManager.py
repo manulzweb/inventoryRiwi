@@ -23,19 +23,19 @@ class CSVManager:
         """         
         if not (os.path.exists(path)):
             raise FileNotFoundError(f"El archivo no existe en la ruta: {path}")
-        if not os.access(path, os.R_OK):
+        if not os.access(path, os.W_OK):
             raise PermissionError("No tienes permisos para escribir en el archivo")
         
         with open(path, mode="w") as file:
-            fieldnames = ["nombre", "precio", "cantidad",]
+            fieldnames = ["name", "price", "quantity",]
             w = csv.DictWriter(file, fieldnames=fieldnames, lineterminator=";")
             if include_header:
                 w.writeheader()
                 for product in inventory:
                     w.writerow({
-                        "nombre": product.getName(),
-                        "precio": product.getPrice(),
-                        "cantidad":product.getQuantity()
+                        "name": product.getName(),
+                        "price": product.getPrice(),
+                        "quantity":product.getQuantity()
                     })
 
     def load_csv(self, path:str):
@@ -46,9 +46,9 @@ class CSVManager:
             raise PermissionError("No tienes permisos para leer el archivo")
 
         with open(path, mode="r") as file:
-            reader = csv.DictReader(file, delimiter=",", lineterminator=";")
+            reader = csv.DictReader(file, delimiter=",", lineterminator=";") #intentar quitar el linedeliminator
             
-            if reader.fieldnames != ["nombre", "precio", "cantidad"]:
+            if reader.fieldnames != ["name", "price", "quantity"]:
                 raise ValueError("El archivo csv no tiene encabezado")
             data: dict[str, str | int | float]
             templist: list[dict[str, str | int | float]] = []
@@ -56,7 +56,7 @@ class CSVManager:
                 try:
                     if len(row) != 3:
                         raise ValueError("Fila dañada")
-                    data = {"nombre": row["nombre"], "precio": float(row["precio"]), "cantidad": int(row["cantidad"])}
+                    data = {"name": row["name"], "price": float(row["price"]), "quantity": int(row["quantity"])}
                     templist.append(data)
                 except:
                     error_rows+=1
