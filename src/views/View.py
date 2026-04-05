@@ -1,7 +1,7 @@
-from colorama import Fore, init
-init(autoreset=True)
 from src.models.Product import Product as Product
 import os
+from colorama import Fore, init
+init(autoreset=True)
 
 class View:
     """
@@ -23,27 +23,27 @@ class View:
 
     def welcomeView(self):
         """
-        Displays welcome message.
+        Displays a welcome message when app start.
         """
-        print(f"╔════════════════════════════════╗")
-        print(f"║           Bienvenido           ║")
-        print(f"╚════════════════════════════════╝" )
+        print("╔════════════════════════════════╗")
+        print("║           Bienvenido           ║")
+        print("╚════════════════════════════════╝" )
 
     def menuView(self):
         """
         Displays the main menu.
         """
-        print(f"╔════════════════════════════════╗")
-        print(f"║ 1. Agregar un nuevo producto   ║")
-        print(f"║ 2. Mostrar producto(s)         ║")
-        print(f"║ 3. Buscar producto por nombre  ║")
-        print(f"║ 4. Actualizar producto         ║")
-        print(f"║ 5. Eliminar producto           ║")
-        print(f"║ 6. Estadísticas producto       ║")
-        print(f"║ 7. Guardar CSV                 ║")
-        print(f"║ 8. Cargar CSV                  ║")
-        print(f"║ 9. Cerrar programa             ║")
-        print(f"╚════════════════════════════════╝" )
+        print("╔════════════════════════════════╗")
+        print("║ 1. Agregar un nuevo producto   ║")
+        print("║ 2. Mostrar producto(s)         ║")
+        print("║ 3. Buscar producto por nombre  ║")
+        print("║ 4. Actualizar producto         ║")
+        print("║ 5. Eliminar producto           ║")
+        print("║ 6. Estadísticas producto       ║")
+        print("║ 7. Guardar CSV                 ║")
+        print("║ 8. Cargar CSV                  ║")
+        print("║ 9. Salir                       ║")
+        print("╚════════════════════════════════╝")
 
     def errorOption(self):
         """
@@ -176,7 +176,7 @@ class View:
         Returns:
             float: Validated product price.
         """
-        price = float(self.validateFloat(f"Precio por unidad: "))
+        price = float(self.validateFloat("Precio por unidad: "))
         if price < 0:
             raise ValueError("El precio no puede ser negativo.")
         return price
@@ -187,9 +187,9 @@ class View:
         Returns:
             int: Validated product quantity.
         """
-        quantity = self.validateInteger(f"Cantidad de unidades: ")
+        quantity = self.validateInteger("Cantidad de unidades: ")
         if quantity < 0:
-            raise ValueError("El precio no puede ser negativo.")
+            raise ValueError("La cantidad no puede ser negativa.")
         return quantity
 
     def captureData(self) -> dict[str, str | float | int]:
@@ -208,9 +208,9 @@ class View:
                 quantity: int = self.captureQuantity()
                 is_valid = True
                 return {
-                    "name": name,
-                    "price": price,
-                    "quantity": quantity
+                    "nombre": name,
+                    "precio": price,
+                    "cantidad": quantity
                 }
             except ValueError as error:
                 self.showMessage(f"Error: {error}")
@@ -259,7 +259,7 @@ class View:
             case _:
                 pass
 
-    def showAllView(self, products: list[Product], total_cost: float):
+    def showAllView(self, products: list[Product]):
         """Displays all products.
 
         Args:
@@ -277,7 +277,6 @@ class View:
             bool: Always returns False to stop program execution.
         """
         print(Fore.LIGHTMAGENTA_EX + "╔════════════════════════════════╗")
-        print(f"║       Cerrando Programa...     ║")
-        print(f"║  Gracias por usar el programa! ║")
-        print(f"╚════════════════════════════════╝" )
-        return False
+        print("║       Cerrando Programa...     ║")
+        print("║  Gracias por usar el programa! ║")
+        print("╚════════════════════════════════╝" )
